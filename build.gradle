@@ -1,0 +1,33 @@
+import com.gradle.develocity.agent.gradle.test.DevelocityTestConfiguration
+
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+def attemptFile = layout.buildDirectory.file('flaky-attempts.txt')
+
+tasks.named('test', Test) {
+    useJUnitPlatform()
+    systemProperty 'flaky.attempt.file', attemptFile.get().asFile.absolutePath
+    doFirst { attemptFile.get().asFile.delete() }
+    outputs.upToDateWhen { false }
+
+    // Typical plugin code: configure retry only when the Develocity Test extension is present.
+    DevelocityTestConfiguration develocity = extensions.findByType(DevelocityTestConfiguration)
+    logger.lifecycle("[repro] Test task 'develocity' extension present: ${develocity != null}")
+    if (develocity != null) {
+        develocity.testRetry {
+            maxRetries = 2
+        }
+    }
+}

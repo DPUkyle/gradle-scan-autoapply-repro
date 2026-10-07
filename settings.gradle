@@ -1,0 +1,21 @@
+// A settings convention plugin, as many organizations use to centrally configure Develocity,
+// consumed the "legacy" way: buildscript classpath + apply plugin.
+// The Develocity plugin is only a TRANSITIVE dependency of the convention plugin.
+buildscript {
+    repositories {
+        maven { url = new File(rootDir, 'local-repo') } // populated by: ./gradlew -p build-logic publish
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'org.example:build-logic:1.0'
+
+        // WORKAROUND: declaring the Develocity plugin directly prevents --scan from auto-applying it.
+        // Uncomment to see the problem disappear.
+        //classpath 'com.gradle:develocity-gradle-plugin:4.5.0'
+    }
+}
+
+// Explicitly applies com.gradle.develocity (see build-logic/src/main/groovy/repro/DevelocityConventionsPlugin.groovy)
+apply plugin: 'repro.develocity-conventions'
+
+rootProject.name = 'gradle-scan-autoapply-repro'

@@ -1,0 +1,27 @@
+plugins {
+    id 'groovy-gradle-plugin'
+    id 'maven-publish'
+}
+
+group = 'org.example'
+version = '1.0'
+
+dependencies {
+    // Same version Gradle 9.7.1 auto-applies for --scan, so no version mismatch is involved.
+    implementation 'com.gradle:develocity-gradle-plugin:4.5.0'
+}
+
+gradlePlugin {
+    plugins {
+        develocityConventions {
+            id = 'repro.develocity-conventions'
+            implementationClass = 'repro.DevelocityConventionsPlugin'
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven { url = layout.projectDirectory.dir('../local-repo') }
+    }
+}
